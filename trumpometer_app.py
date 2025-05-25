@@ -1,13 +1,13 @@
 
 import streamlit as st
-import openai
+from openai import OpenAI
 import sqlite3
 from datetime import datetime
 import pandas as pd
 import plotly.express as px
 
-# Set your OpenAI API key
-openai.api_key = st.secrets["OPENAI_API_KEY"]
+# Initialize OpenAI client with API key from Streamlit secrets
+client = OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
 
 st.set_page_config(page_title="Trumpometer", layout="wide")
 st.title("🇺🇸 Trumpometer v3.0 – Real-Time Market Sentiment from Trump Tweets")
@@ -43,8 +43,9 @@ Return a JSON object like this:
 
 Only return the JSON object.
 """
+
         try:
-            response = openai.ChatCompletion.create(
+            response = client.chat.completions.create(
                 model="gpt-4",
                 messages=[
                     {"role": "system", "content": "You are a financial sentiment extraction agent."},
@@ -52,7 +53,7 @@ Only return the JSON object.
                 ],
                 temperature=0.2
             )
-            result = response.choices[0].message["content"]
+            result = response.choices[0].message.content
             st.code(result, language="json")
 
             # Save to database
